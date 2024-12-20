@@ -1,40 +1,31 @@
 #include <Arduino.h>
-const int potentiometerPin = 36;  // ขาอ่านค่าจาก potentiometer
-const int ledPins[] = {23, 19, 18, 5, 17, 16, 4, 0}; // ขาเชื่อมต่อกับ LED
-const int numLeds = 8; // จำนวนหลอด LED
+const int ledPins[] = {23, 19, 18, 5, 17, 16, 4, 0}; // ขาเชื่อมต่อของ LED
+const int potPin = 36; // ขาที่เชื่อมต่อกับ potentiometer
 
 void setup() {
   // ตั้งค่าขา LED เป็น OUTPUT
-  for (int i = 0; i < numLeds; i++) {
+  for (int i = 0; i < 8; i++) {
     pinMode(ledPins[i], OUTPUT);
-    digitalWrite(ledPins[i], LOW); // ปิด LED เริ่มต้น
   }
-
-  Serial.begin(115200); // สำหรับ Debug
+  // ตั้งค่าขา potentiometer เป็น INPUT
+  pinMode(potPin, INPUT);
 }
 
 void loop() {
   // อ่านค่าจาก potentiometer
-  int potValue = analogRead(potentiometerPin);
+  int potValue = analogRead(potPin);
 
-  // แปลงค่า 0-4095 เป็น 0-100
+  // ใช้ฟังก์ชัน map() เพื่อแปลงค่า 0-4095 เป็น 0-100
   int mappedValue = map(potValue, 0, 4095, 0, 100);
 
-  // คำนวณจำนวน LED ที่ต้องติด
-  int ledsToLight = map(mappedValue, 0, 100, 0, numLeds);
+  // คำนวณจำนวนหลอด LED ที่ต้องการเปิด (จาก 0 ถึง 8)
+  int numLedsOn = mappedValue / (100 / 8);
 
-  // ใช้ตรรกะแบบบูลีนเพื่อควบคุม LED
-  for (int i = 0; i < numLeds; i++) {
-    digitalWrite(ledPins[i], i < ledsToLight); // จะเขียน HIGH ถ้า i < ledsToLight, LOW ถ้าไม่ใช่
+  // เปิด/ปิด LED โดยไม่ใช้ if-else
+  for (int i = 0; i < 8; i++) {
+    digitalWrite(ledPins[i], i < numLedsOn ? HIGH : LOW);
   }
 
-  // Debug แสดงผลใน Serial Monitor
-  Serial.print("Potentiometer Value: ");
-  Serial.print(potValue);
-  Serial.print(" | Mapped Value: ");
-  Serial.print(mappedValue);
-  Serial.print(" | LEDs On: ");
-  Serial.println(ledsToLight);
-
-  delay(100); // หน่วงเวลาเล็กน้อย
+  // หน่วงเวลาเล็กน้อยเพื่อความเสถียร
+  delay(50);
 }
